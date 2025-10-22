@@ -3,7 +3,7 @@ from telebot import types
 import traceback
 
 # 🔹 Боттың токені
-BOT_TOKEN = "МҰНДА ӨЗ ТОКЕНІҢДІ ЖАЗ"  
+BOT_TOKEN = "6947421569:AAE-UpX3FHZf6bzt-YUpMAvDZp66MWkHgSM"  
 bot = telebot.TeleBot(BOT_TOKEN, parse_mode="HTML")
 
 # 🔹 Арналар мен әкім
