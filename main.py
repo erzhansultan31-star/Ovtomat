@@ -1,0 +1,58 @@
+import telebot
+from telebot import types
+import traceback
+
+# 🔹 Боттың токені
+BOT_TOKEN = "МҰНДА ӨЗ ТОКЕНІҢДІ ЖАЗ"  
+bot = telebot.TeleBot(BOT_TOKEN, parse_mode="HTML")
+
+# 🔹 Арналар мен әкім
+SOURCE_CHANNEL = "@GOAL24Main"          # қай каналдан алады
+TARGET_CHANNEL = "-1002948354799"       # қай каналға жібереді
+ADMIN_ID = 1815036801                   # саған хабар жібереді (қате шықса)
+
+# ------------------------------------------------------------
+# ⚙️ Реклама сүзгісі
+def contains_ad(text: str):
+    if not text:
+        return False
+    ads_words = [
+        "реклама", "sponsor", "sponsored", "партнер", "партнёр", 
+        "бот", "channel", "promo", "жарнама"
+    ]
+    return any(word.lower() in text.lower() for word in ads_words)
+
+# ------------------------------------------------------------
+# 📩 Жаңа посттар
+@bot.channel_post_handler(func=lambda msg: True)
+def repost_message(msg):
+    try:
+        # Егер пост GOAL24Main каналынан болса
+        if msg.chat.username == SOURCE_CHANNEL.replace("@", ""):
+            
+            # Егер жарнама болса – өткізіп жібереміз
+            if msg.text and contains_ad(msg.text):
+                print("🚫 Реклама табылды — өткізіліп кетті.")
+                return
+            
+            # Хабарламаны көшіру (forward емес)
+            if msg.text:
+                bot.send_message(TARGET_CHANNEL, msg.text)
+            elif msg.caption and msg.photo:
+                bot.send_photo(TARGET_CHANNEL, msg.photo[-1].file_id, caption=msg.caption)
+            elif msg.video:
+                bot.send_video(TARGET_CHANNEL, msg.video.file_id, caption=msg.caption or "")
+            elif msg.animation:
+                bot.send_animation(TARGET_CHANNEL, msg.animation.file_id, caption=msg.caption or "")
+            else:
+                print("⚠️ Хабарлама түрі танылмады.")
+            
+            print("✅ Пост сәтті көшірілді!")
+
+    except Exception as e:
+        error_text = f"❌ Қате шықты:\n{traceback.format_exc()}"
+        bot.send_message(ADMIN_ID, error_text)
+
+# ------------------------------------------------------------
+print("🚀 Бот іске қосылды. GOAL24Main каналын бақылауда...")
+bot.polling(non_stop=True)
